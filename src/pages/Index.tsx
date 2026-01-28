@@ -64,6 +64,7 @@ const Index = () => {
 
   const currentBlock = state.currentBlock;
   const todayDate = currentBlock ? format(new Date(currentBlock.date), 'EEEE, MMMM d, yyyy') : '';
+  const paddedBlockNumber = currentBlock ? String(currentBlock.blockNumber).padStart(6, '0') : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
@@ -91,9 +92,9 @@ const Index = () => {
               <Button
                 onClick={() => handleBlockClick(currentBlock)}
                 size="lg"
-                className="shadow-lg"
+                className="shadow-lg font-mono"
               >
-                Today's Block #{currentBlock.blockNumber}
+                Today's Block #{paddedBlockNumber}
                 <span className="ml-2 px-2 py-0.5 rounded-full bg-primary-foreground/20 text-sm font-bold">
                   {currentBlock.fillPercentage}%
                 </span>

@@ -12,6 +12,7 @@ interface BlockCardProps {
 export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
   const date = new Date(block.date);
   const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+  const paddedBlockNumber = String(block.blockNumber).padStart(6, '0');
 
   if (compact) {
     return (
@@ -40,13 +41,19 @@ export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
         {/* Content overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center p-1 z-10">
           <div className={cn(
-            "text-[10px] font-bold leading-tight text-center transition-colors",
+            "text-[9px] font-mono font-bold leading-tight text-center transition-colors",
             block.fillPercentage > 30 ? 'text-white' : 'text-foreground'
           )}>
-            #{block.blockNumber}
+            {paddedBlockNumber}
           </div>
           <div className={cn(
-            "text-[8px] leading-tight transition-colors",
+            "text-[7px] font-medium leading-tight transition-colors mt-0.5",
+            block.fillPercentage > 30 ? 'text-white/70' : 'text-muted-foreground'
+          )}>
+            {format(date, 'MM/dd')}
+          </div>
+          <div className={cn(
+            "text-[7px] leading-tight transition-colors",
             block.fillPercentage > 30 ? 'text-white/80' : 'text-muted-foreground'
           )}>
             {block.fillPercentage}%
@@ -101,7 +108,7 @@ export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
                 "text-sm font-mono font-bold transition-colors",
                 block.fillPercentage > 40 ? 'text-white' : 'text-foreground'
               )}>
-                Block #{block.blockNumber}
+                Block #{paddedBlockNumber}
               </span>
               {block.mined ? (
                 <Lock className={cn(

@@ -32,6 +32,7 @@ export function BlockDetailDialog({
   const date = new Date(block.date);
   const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
   const canEdit = !block.mined && isToday && onToggleCompletion;
+  const paddedBlockNumber = String(block.blockNumber).padStart(6, '0');
 
   const getCriteriaStatus = (completion: CriteriaCompletion) => {
     const criteriaItem = criteria.find((c) => c.id === completion.criteriaId);
@@ -59,7 +60,7 @@ export function BlockDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">Block #{block.blockNumber}</span>
+              <span className="text-2xl font-mono">Block #{paddedBlockNumber}</span>
               {block.mined ? (
                 <Lock className="h-5 w-5 text-muted-foreground" />
               ) : (
