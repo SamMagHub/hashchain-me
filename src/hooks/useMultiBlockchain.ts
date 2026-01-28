@@ -69,8 +69,8 @@ export function useMultiBlockchain() {
       const today = getDateString(new Date());
       const daysSinceStart = getDaysBetween(startDate, today);
 
-      // Create blocks for each day from start to today
-      for (let i = 0; i <= daysSinceStart; i++) {
+      // Create blocks for each day from start to today + 7 future days
+      for (let i = 0; i <= daysSinceStart + 7; i++) {
         const blockDate = new Date(startDate);
         blockDate.setDate(blockDate.getDate() + i);
         const dateStr = getDateString(blockDate);
@@ -94,7 +94,9 @@ export function useMultiBlockchain() {
         });
       }
 
-      const currentBlock = blocks[blocks.length - 1];
+      // Find today's block as current
+      const todayIndex = blocks.findIndex(b => b.date === today);
+      const currentBlock = todayIndex >= 0 ? blocks[todayIndex] : blocks[blocks.length - 1];
 
       const newChain: Blockchain = {
         id: `chain-${Date.now()}-${Math.random()}`,
@@ -323,30 +325,48 @@ export function useMultiBlockchain() {
           );
 
           if (prev.currentBlock.date !== today) {
+            // Check if we need to add future blocks
+            const lastBlockDate = updatedBlocks[updatedBlocks.length - 1]?.date || today;
+            const daysBetweenLastAndToday = getDaysBetween(lastBlockDate, today);
+            
+            // Add any missing blocks up to today + 7 days
+            const newBlocks: Block[] = [];
             const daysSinceStart = getDaysBetween(prev.config.startDate, today);
-            const newBlockNumber = daysSinceStart;
+            
+            for (let offset = daysBetweenLastAndToday; offset <= 7; offset++) {
+              const futureDate = new Date(today);
+              futureDate.setDate(futureDate.getDate() + offset);
+              const futureDateStr = getDateString(futureDate);
+              
+              // Check if block already exists
+              if (!updatedBlocks.some(b => b.date === futureDateStr)) {
+                const blockNumber = daysSinceStart + offset;
+                const completions: CriteriaCompletion[] = activeCriteria.map((c) => ({
+                  criteriaId: c.id,
+                  completed: false,
+                }));
 
-            const completions: CriteriaCompletion[] = activeCriteria.map((c) => ({
-              criteriaId: c.id,
-              completed: false,
-            }));
+                newBlocks.push({
+                  blockNumber,
+                  date: futureDateStr,
+                  timestamp: futureDate.getTime(),
+                  completions,
+                  mined: false,
+                  fillPercentage: 0,
+                  hash: generateBlockHash(blockNumber, futureDateStr),
+                });
+              }
+            }
 
-            const newBlock: Block = {
-              blockNumber: newBlockNumber,
-              date: today,
-              timestamp: new Date().getTime(),
-              completions,
-              mined: false,
-              fillPercentage: 0,
-              hash: generateBlockHash(newBlockNumber, today),
-            };
-
-            updatedBlocks = [...updatedBlocks, newBlock];
+            updatedBlocks = [...updatedBlocks, ...newBlocks];
+            
+            // Set current block to today's block
+            const todayBlock = updatedBlocks.find(b => b.date === today);
 
             return {
               ...prev,
               blocks: updatedBlocks,
-              currentBlock: newBlock,
+              currentBlock: todayBlock || updatedBlocks[updatedBlocks.length - 1],
             };
           }
 
