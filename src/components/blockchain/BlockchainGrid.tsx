@@ -147,18 +147,8 @@ export function BlockchainGrid({ blocks, onBlockClick, className }: BlockchainGr
           </div>
 
           {/* Vertical divider */}
-          <div className="relative flex-shrink-0 flex flex-col items-center px-6">
+          <div className="relative flex-shrink-0 px-6">
             <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 border-l-2 border-dashed border-primary/30" />
-            <div className="relative z-10 bg-background px-3 py-2 rounded-full border-2 border-primary/30 mt-8">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-xs font-bold text-primary whitespace-nowrap">
-                  Mining
-                </span>
-                <span className="text-xs font-bold text-primary whitespace-nowrap">
-                  Boundary
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Mined blocks section (right side) */}
