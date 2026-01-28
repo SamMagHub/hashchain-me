@@ -35,6 +35,21 @@ export interface BlockchainState {
   currentBlock: Block | null;
 }
 
+// Blockchain with metadata for multi-chain support
+export interface Blockchain {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: number;
+  state: BlockchainState;
+}
+
+// Multi-chain storage structure
+export interface MultiChainState {
+  chains: Blockchain[];
+  activeChainId: string | null;
+}
+
 // Helper to calculate block fill percentage
 export function calculateFillPercentage(
   completions: CriteriaCompletion[],

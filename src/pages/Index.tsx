@@ -1,30 +1,38 @@
 import { useState } from 'react';
 import { useSeoMeta } from '@unhead/react';
-import { useBlockchain } from '@/hooks/useBlockchain';
+import { useMultiBlockchain } from '@/hooks/useMultiBlockchain';
 import { SetupWizard } from '@/components/blockchain/SetupWizard';
 import { BlockchainGrid } from '@/components/blockchain/BlockchainGrid';
 import { BlockDetailDialog } from '@/components/blockchain/BlockDetailDialog';
 import { CriteriaManager } from '@/components/blockchain/CriteriaManager';
 import { BlockchainAnalytics } from '@/components/blockchain/BlockchainAnalytics';
-import { Block } from '@/types/blockchain';
+import { ChainManager } from '@/components/blockchain/ChainManager';
+import { ChainSelector } from '@/components/blockchain/ChainSelector';
+import { Block, Criteria } from '@/types/blockchain';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Grid3x3, Settings } from 'lucide-react';
+import { BarChart3, Grid3x3, Settings, Database } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Index = () => {
   const {
+    chains,
+    activeChain,
+    createChain,
+    switchChain,
+    renameChain,
+    deleteChain,
     state,
     activeCriteria,
-    initialize,
     addCriteria,
     updateCriteria,
     archiveCriteria,
     toggleCompletion,
-  } = useBlockchain();
+  } = useMultiBlockchain();
 
   const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
 
   useSeoMeta({
     title: 'Personal Blockchain - Track Your Daily Goals',
@@ -40,9 +48,18 @@ const Index = () => {
     toggleCompletion(criteriaId);
   };
 
-  // Show setup wizard if not initialized
-  if (!state.config.initialized) {
-    return <SetupWizard onComplete={initialize} />;
+  const handleCreateChain = (name: string, description: string, startDate: string, criteria: Criteria[]) => {
+    createChain(name, description, startDate, criteria);
+    setShowSetupWizard(false);
+  };
+
+  const handleNewChain = () => {
+    setShowSetupWizard(true);
+  };
+
+  // Show setup wizard if creating new chain or no chains exist
+  if (showSetupWizard || chains.length === 0) {
+    return <SetupWizard onComplete={handleCreateChain} />;
   }
 
   const currentBlock = state.currentBlock;
@@ -53,13 +70,20 @@ const Index = () => {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <div className="h-5 w-5 rounded bg-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Personal Blockchain</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">Personal Blockchain</h1>
+                  <ChainSelector
+                    chains={chains}
+                    activeChainId={activeChain?.id || null}
+                    onSwitch={switchChain}
+                  />
+                </div>
                 <p className="text-sm text-muted-foreground">{todayDate}</p>
               </div>
             </div>
@@ -82,7 +106,7 @@ const Index = () => {
       {/* Main content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="chain" className="space-y-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
             <TabsTrigger value="chain">
               <Grid3x3 className="mr-2 h-4 w-4" />
               Chain
@@ -90,6 +114,10 @@ const Index = () => {
             <TabsTrigger value="analytics">
               <BarChart3 className="mr-2 h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="chains">
+              <Database className="mr-2 h-4 w-4" />
+              Chains
             </TabsTrigger>
             <TabsTrigger value="settings">
               <Settings className="mr-2 h-4 w-4" />
@@ -123,8 +151,27 @@ const Index = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="settings">
+          <TabsContent value="chains">
             <div className="max-w-4xl mx-auto">
+              <ChainManager
+                chains={chains}
+                activeChainId={activeChain?.id || null}
+                onSwitch={switchChain}
+                onRename={renameChain}
+                onDelete={deleteChain}
+                onCreateNew={handleNewChain}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold">Chain Settings</h2>
+                <p className="text-muted-foreground">
+                  Manage criteria for {activeChain?.name}
+                </p>
+              </div>
               <CriteriaManager
                 criteria={state.config.criteria}
                 onAdd={addCriteria}

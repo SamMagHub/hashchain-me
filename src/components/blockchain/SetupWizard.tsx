@@ -13,11 +13,13 @@ import { CalendarIcon, Plus, Trash2 } from 'lucide-react';
 import { Criteria } from '@/types/blockchain';
 
 interface SetupWizardProps {
-  onComplete: (startDate: string, criteria: Criteria[]) => void;
+  onComplete: (name: string, description: string, startDate: string, criteria: Criteria[]) => void;
 }
 
 export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [step, setStep] = useState(1);
+  const [chainName, setChainName] = useState('');
+  const [chainDescription, setChainDescription] = useState('');
   const [startDate, setStartDate] = useState<Date>();
   const [criteria, setCriteria] = useState<Criteria[]>([]);
   const [newCriteria, setNewCriteria] = useState({
@@ -46,9 +48,9 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   };
 
   const handleComplete = () => {
-    if (!startDate || criteria.length === 0) return;
+    if (!chainName.trim() || !startDate || criteria.length === 0) return;
     const dateStr = format(startDate, 'yyyy-MM-dd');
-    onComplete(dateStr, criteria);
+    onComplete(chainName, chainDescription, dateStr, criteria);
   };
 
   return (
@@ -67,6 +69,46 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           {step === 1 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Name Your Blockchain</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="chain-name">Chain Name</Label>
+                    <Input
+                      id="chain-name"
+                      placeholder="e.g., Fitness Goals, Work Objectives, Daily Habits"
+                      value={chainName}
+                      onChange={(e) => setChainName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && chainName.trim()) {
+                          e.preventDefault();
+                          setStep(2);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="chain-desc">Description (optional)</Label>
+                    <Textarea
+                      id="chain-desc"
+                      placeholder="What is this blockchain for?"
+                      value={chainDescription}
+                      onChange={(e) => setChainDescription(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button onClick={() => setStep(2)} disabled={!chainName.trim()} size="lg">
+                  Next: Choose Start Date
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold mb-4">Choose Your Genesis Block Date</h3>
@@ -101,15 +143,18 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                   This will be block 0 of your chain. You can choose today or a past date.
                 </p>
               </div>
-              <div className="flex justify-end pt-4">
-                <Button onClick={() => setStep(2)} disabled={!startDate} size="lg">
+              <div className="flex justify-between pt-4 gap-3">
+                <Button onClick={() => setStep(1)} variant="outline" size="lg">
+                  Back
+                </Button>
+                <Button onClick={() => setStep(3)} disabled={!startDate} size="lg">
                   Next: Add Criteria
                 </Button>
               </div>
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-4">Define Your Criteria</h3>
@@ -222,7 +267,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               </div>
 
               <div className="flex justify-between pt-4 gap-3">
-                <Button onClick={() => setStep(1)} variant="outline" size="lg">
+                <Button onClick={() => setStep(2)} variant="outline" size="lg">
                   Back
                 </Button>
                 <Button onClick={handleComplete} disabled={criteria.length === 0} size="lg">
