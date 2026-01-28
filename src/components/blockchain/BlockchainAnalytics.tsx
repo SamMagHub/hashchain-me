@@ -3,6 +3,7 @@ import { Block } from '@/types/blockchain';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { format } from 'date-fns';
+import { PeriodBlockGrid } from './PeriodBlockGrid';
 
 interface BlockchainAnalyticsProps {
   blocks: Block[];
@@ -98,6 +99,28 @@ export function BlockchainAnalytics({ blocks }: BlockchainAnalyticsProps) {
             <CardTitle className="text-3xl">{stats.perfectBlocks}</CardTitle>
           </CardHeader>
         </Card>
+      </div>
+
+      {/* Period Grid Views */}
+      <div className="space-y-6">
+        <PeriodBlockGrid
+          blocks={blocks}
+          title="Past Week"
+          description="Last 7 days of blocks"
+          daysToShow={7}
+        />
+        <PeriodBlockGrid
+          blocks={blocks}
+          title="Past Month"
+          description="Last 30 days of blocks"
+          daysToShow={30}
+        />
+        <PeriodBlockGrid
+          blocks={blocks}
+          title="Past Year"
+          description="Last 365 days of blocks"
+          daysToShow={365}
+        />
       </div>
 
       {/* Area chart - all time trend */}
