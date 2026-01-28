@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm i --silent && vite",
-    "build": "npm i --silent && vite build -l error && cp dist/index.html dist/404.html && echo 'Project built successfully!'",
-    "test": "npm i --silent && tsc --noEmit && eslint && vitest run --reporter=dot --silent && vite build -l error && cp dist/index.html dist/404.html && echo 'All tests passed!'"
+    "dev": "vite",
+    "build": "vite build && cp dist/index.html dist/404.html",
+    "test": "tsc --noEmit && eslint && vitest run"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.6",
