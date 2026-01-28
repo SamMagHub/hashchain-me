@@ -1,23 +1,164 @@
+import { useState } from 'react';
 import { useSeoMeta } from '@unhead/react';
-
-// FIXME: Update this page (the content is just a fallback if you fail to update the page)
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { SetupWizard } from '@/components/blockchain/SetupWizard';
+import { BlockchainGrid } from '@/components/blockchain/BlockchainGrid';
+import { BlockDetailDialog } from '@/components/blockchain/BlockDetailDialog';
+import { CriteriaManager } from '@/components/blockchain/CriteriaManager';
+import { BlockchainAnalytics } from '@/components/blockchain/BlockchainAnalytics';
+import { Block } from '@/types/blockchain';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart3, Grid3x3, Settings } from 'lucide-react';
+import { format } from 'date-fns';
 
 const Index = () => {
+  const {
+    state,
+    activeCriteria,
+    initialize,
+    addCriteria,
+    updateCriteria,
+    archiveCriteria,
+    toggleCompletion,
+  } = useBlockchain();
+
+  const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+
   useSeoMeta({
-    title: 'Welcome to Your Blank App',
-    description: 'A modern Nostr client application built with React, TailwindCSS, and Nostrify.',
+    title: 'Personal Blockchain - Track Your Daily Goals',
+    description: 'Visualize your daily progress as an immutable blockchain. Mine blocks by completing goals.',
   });
 
+  const handleBlockClick = (block: Block) => {
+    setSelectedBlock(block);
+    setDetailDialogOpen(true);
+  };
+
+  const handleToggleCompletion = (criteriaId: string) => {
+    toggleCompletion(criteriaId);
+  };
+
+  // Show setup wizard if not initialized
+  if (!state.config.initialized) {
+    return <SetupWizard onComplete={initialize} />;
+  }
+
+  const currentBlock = state.currentBlock;
+  const todayDate = currentBlock ? format(new Date(currentBlock.date), 'EEEE, MMMM d, yyyy') : '';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-          Welcome to Your Blank App
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Start building your amazing project here!
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-5 w-5 rounded bg-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Personal Blockchain</h1>
+                <p className="text-sm text-muted-foreground">{todayDate}</p>
+              </div>
+            </div>
+            {currentBlock && (
+              <Button
+                onClick={() => handleBlockClick(currentBlock)}
+                size="lg"
+                className="shadow-lg"
+              >
+                Today's Block #{currentBlock.blockNumber}
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-primary-foreground/20 text-sm font-bold">
+                  {currentBlock.fillPercentage}%
+                </span>
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="chain" className="space-y-6">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+            <TabsTrigger value="chain">
+              <Grid3x3 className="mr-2 h-4 w-4" />
+              Chain
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="chain" className="space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold">Your Blockchain</h2>
+              <p className="text-muted-foreground">
+                Each block represents one day. Click any block to view details.
+              </p>
+            </div>
+            <BlockchainGrid
+              blocks={state.blocks}
+              onBlockClick={handleBlockClick}
+              className="max-w-6xl mx-auto"
+            />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <div className="max-w-6xl mx-auto space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold">Analytics</h2>
+                <p className="text-muted-foreground">
+                  Track your progress and identify patterns over time
+                </p>
+              </div>
+              <BlockchainAnalytics blocks={state.blocks} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="max-w-4xl mx-auto">
+              <CriteriaManager
+                criteria={state.config.criteria}
+                onAdd={addCriteria}
+                onUpdate={updateCriteria}
+                onArchive={archiveCriteria}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Block detail dialog */}
+      <BlockDetailDialog
+        block={selectedBlock}
+        criteria={state.config.criteria}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        onToggleCompletion={handleToggleCompletion}
+      />
+
+      {/* Footer */}
+      <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
+        <p>
+          Vibed with{' '}
+          <a
+            href="https://shakespeare.diy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Shakespeare
+          </a>
         </p>
-      </div>
+      </footer>
     </div>
   );
 };
