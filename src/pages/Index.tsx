@@ -35,7 +35,7 @@ const Index = () => {
   const [showSetupWizard, setShowSetupWizard] = useState(false);
 
   useSeoMeta({
-    title: 'Personal Blockchain - Track Your Daily Goals',
+    title: 'HashChain.me - Track Your Daily Goals',
     description: 'Visualize your daily progress as an immutable blockchain. Mine blocks by completing goals.',
   });
 
@@ -78,7 +78,7 @@ const Index = () => {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">Personal Blockchain</h1>
+                  <h1 className="text-2xl font-bold">HashChain.me</h1>
                   <ChainSelector
                     chains={chains}
                     activeChainId={activeChain?.id || null}

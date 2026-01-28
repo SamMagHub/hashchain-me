@@ -61,10 +61,10 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <div className="h-4 w-4 rounded bg-primary" />
             </div>
-            <CardTitle className="text-2xl">Initialize Your Chain</CardTitle>
+            <CardTitle className="text-2xl">HashChain.me</CardTitle>
           </div>
           <CardDescription>
-            Create your personal blockchain to track your daily goals and progress
+            Create your blockchain to track daily goals and progress
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
