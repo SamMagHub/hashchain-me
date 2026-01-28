@@ -84,16 +84,22 @@ export function BlockchainGrid({ blocks, onBlockClick, className }: BlockchainGr
       {/* Legend */}
       <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground pt-4 border-t">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-gradient-to-br from-muted/50 to-muted" />
-          <span>0-20%</span>
+          <div className="relative w-6 h-6 rounded border border-border/50 bg-muted/30 overflow-hidden">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-primary/90" style={{ height: '25%' }} />
+          </div>
+          <span>25% Full</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-gradient-to-br from-primary/40 to-primary/60" />
-          <span>40-60%</span>
+          <div className="relative w-6 h-6 rounded border border-border/50 bg-muted/30 overflow-hidden">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-primary/90" style={{ height: '50%' }} />
+          </div>
+          <span>50% Full</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-gradient-to-br from-primary/80 to-primary" />
-          <span>80-100%</span>
+          <div className="relative w-6 h-6 rounded border border-border/50 bg-muted/30 overflow-hidden">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-primary/90" style={{ height: '100%' }} />
+          </div>
+          <span>100% Full</span>
         </div>
       </div>
     </div>

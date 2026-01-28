@@ -9,16 +9,7 @@ interface BlockCardProps {
   compact?: boolean;
 }
 
-function getBlockColor(fillPercentage: number): string {
-  if (fillPercentage >= 80) return 'from-primary/80 to-primary';
-  if (fillPercentage >= 60) return 'from-primary/60 to-primary/80';
-  if (fillPercentage >= 40) return 'from-primary/40 to-primary/60';
-  if (fillPercentage >= 20) return 'from-primary/20 to-primary/40';
-  return 'from-muted/50 to-muted';
-}
-
 export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
-  const gradientClass = getBlockColor(block.fillPercentage);
   const date = new Date(block.date);
   const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
@@ -27,10 +18,9 @@ export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
       <button
         onClick={onClick}
         className={cn(
-          'relative group rounded border transition-all duration-300',
+          'relative overflow-hidden rounded border border-border/50 transition-all duration-300',
           'hover:scale-105 hover:shadow-lg hover:border-primary/50',
-          'bg-gradient-to-br',
-          gradientClass,
+          'bg-muted/30',
           isToday && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
         )}
         style={{
@@ -38,17 +28,47 @@ export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
           aspectRatio: '1/1',
         }}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-1">
-          <div className="text-[10px] font-bold text-white/90 leading-tight text-center">
+        {/* Filled portion (from bottom) */}
+        <div
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary via-primary to-primary/90 transition-all duration-700 ease-out"
+          style={{ height: `${block.fillPercentage}%` }}
+        >
+          {/* Inner glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+        </div>
+
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-1 z-10">
+          <div className={cn(
+            "text-[10px] font-bold leading-tight text-center transition-colors",
+            block.fillPercentage > 30 ? 'text-white' : 'text-foreground'
+          )}>
             #{block.blockNumber}
           </div>
-          <div className="text-[8px] text-white/70 leading-tight">
+          <div className={cn(
+            "text-[8px] leading-tight transition-colors",
+            block.fillPercentage > 30 ? 'text-white/80' : 'text-muted-foreground'
+          )}>
             {block.fillPercentage}%
           </div>
         </div>
+
+        {/* Lock icon */}
         {block.mined && (
-          <Lock className="absolute bottom-1 right-1 h-2 w-2 text-white/60" />
+          <Lock className={cn(
+            "absolute bottom-1 right-1 h-2 w-2 z-10 transition-colors",
+            block.fillPercentage > 30 ? 'text-white/60' : 'text-muted-foreground/60'
+          )} />
         )}
+
+        {/* Subtle grid pattern overlay for texture */}
+        <div 
+          className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent)`,
+            backgroundSize: '8px 8px',
+          }}
+        />
       </button>
     );
   }
@@ -57,59 +77,109 @@ export function BlockCard({ block, onClick, compact = false }: BlockCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        'relative group rounded-lg border transition-all duration-300 overflow-hidden',
+        'relative overflow-hidden rounded-lg border border-border transition-all duration-300',
         'hover:scale-102 hover:shadow-xl hover:border-primary/50',
-        'bg-gradient-to-br',
-        gradientClass,
+        'bg-muted/50',
         isToday && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
       )}
     >
-      <div className="p-4 space-y-3">
+      {/* Filled portion (from bottom) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary via-primary to-primary/90 transition-all duration-700 ease-out"
+        style={{ height: `${block.fillPercentage}%` }}
+      >
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+      </div>
+
+      {/* Content overlay */}
+      <div className="relative z-10 p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-mono font-bold text-white/90">
+              <span className={cn(
+                "text-sm font-mono font-bold transition-colors",
+                block.fillPercentage > 40 ? 'text-white' : 'text-foreground'
+              )}>
                 Block #{block.blockNumber}
               </span>
               {block.mined ? (
-                <Lock className="h-3 w-3 text-white/60" />
+                <Lock className={cn(
+                  "h-3 w-3 transition-colors",
+                  block.fillPercentage > 40 ? 'text-white/60' : 'text-muted-foreground'
+                )} />
               ) : (
-                <Unlock className="h-3 w-3 text-white/80" />
+                <Unlock className={cn(
+                  "h-3 w-3 transition-colors",
+                  block.fillPercentage > 40 ? 'text-white/80' : 'text-primary'
+                )} />
               )}
             </div>
-            <div className="text-xs text-white/70 font-medium">
+            <div className={cn(
+              "text-xs font-medium transition-colors",
+              block.fillPercentage > 40 ? 'text-white/70' : 'text-muted-foreground'
+            )}>
               {format(date, 'MMM d, yyyy')}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-white">
+            <div className={cn(
+              "text-2xl font-bold transition-colors",
+              block.fillPercentage > 40 ? 'text-white' : 'text-foreground'
+            )}>
               {block.fillPercentage}%
             </div>
-            <div className="text-xs text-white/70">filled</div>
+            <div className={cn(
+              "text-xs transition-colors",
+              block.fillPercentage > 40 ? 'text-white/70' : 'text-muted-foreground'
+            )}>
+              filled
+            </div>
           </div>
         </div>
 
         {/* Block hash */}
-        <div className="pt-2 border-t border-white/10">
-          <div className="text-[10px] font-mono text-white/50 truncate">
+        <div className={cn(
+          "pt-2 border-t transition-colors",
+          block.fillPercentage > 40 ? 'border-white/10' : 'border-border'
+        )}>
+          <div className={cn(
+            "text-[10px] font-mono truncate transition-colors",
+            block.fillPercentage > 40 ? 'text-white/50' : 'text-muted-foreground'
+          )}>
             {block.hash}
           </div>
         </div>
 
-        {/* Fill indicator */}
-        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+        {/* Fill indicator bar */}
+        <div className={cn(
+          "w-full h-2 rounded-full overflow-hidden transition-colors",
+          block.fillPercentage > 40 ? 'bg-white/10' : 'bg-muted'
+        )}>
           <div
-            className="h-full bg-white/40 transition-all duration-500"
+            className={cn(
+              "h-full transition-all duration-500",
+              block.fillPercentage > 40 ? 'bg-white/40' : 'bg-primary'
+            )}
             style={{ width: `${block.fillPercentage}%` }}
           />
         </div>
 
         {isToday && (
-          <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-bold rounded">
+          <div className="absolute top-2 right-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-bold rounded shadow-lg z-20">
             TODAY
           </div>
         )}
       </div>
+
+      {/* Subtle grid pattern overlay for texture */}
+      <div 
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent)`,
+          backgroundSize: '12px 12px',
+        }}
+      />
     </button>
   );
 }
