@@ -13,7 +13,7 @@ import { useNostr } from '@nostrify/react';
 import type { NostrEvent } from '@nostrify/nostrify';
 
 export function useZaps(
-  target: Event | Event[],
+  target: event: event || undefined,
   webln: WebLNProvider | null,
   _nwcConnection: NWCConnection | null,
   onZapSuccess?: () => void
